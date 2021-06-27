@@ -1,0 +1,76 @@
+---
+title: 'Sta 137 Project #1'
+author: "Miguel Morales"
+date: "5/1/2021"
+output: html_document
+---
+
+```{r}
+library(astsa)
+data<-read.csv('~/Downloads/Project_1_Data.csv')
+data<-ts(data)
+data
+```
+
+
+```{r}
+st <- data
+wt <- rnorm(144,0,1)
+xt<- st+wt
+tsplot(st, main = 'Monthly Temperature')
+tsplot(wt)
+tsplot(xt, col=6, main='Monthly Temperature')
+```
+From the plot of xt, the seasonal data added to the white noise data, we can see that the monthly temperature tends to have a fluctuation cycle lasting about between 12 months. In this cycle, the monthly temperature increases for half of the time, usually from somewhere around 15-20 degrees all the way to around 70 degrees. Once it reaches this temeprature, it begins to fall at the same level it rose until ti reaches around to wehre it began. This cycle is followed every year. 
+
+```{r}
+st<-ts(st, start=c(1964, 1), end=c(1975, 12), frequency =12)
+st
+```
+
+```{r}
+trend <- time(st)
+M<-factor(cycle(st))
+
+model <- lm(st~0 + M, na.action=NULL)
+summary(model)
+```
+
+
+
+```{r}
+plot(st, main="plot of data and fitted value")
+lines(fitted(model), col="red")
+plot(st-fitted(model), main="plot of residuals")
+```
+
+```{r}
+t= 1:length(data)
+t
+k<-1:6
+k
+```
+
+```{r}
+df<-data.frame(X=data, cos_1 = cos((2*1*pi*t)/12), sin_1 = sin((2*1*pi*t)/12),cos_2 = cos((2*2*pi*t)/12), sin_2 = sin((2*2*pi*t)/12),cos_3 = cos((2*3*pi*t)/12), sin_3 = sin((2*3*pi*t)/12),cos_4 = cos((2*4*pi*t)/12), sin_4= sin((2*4*pi*t)/12),cos_5 = cos((2*5*pi*t)/12), sin_5 = sin((2*5*pi*t)/12),cos_6 = cos((2*6*pi*t)/12), sin_6 = sin((2*6*pi*t)/12))
+df
+```
+
+
+```{r}
+model_2 <- lm(data ~ cos_1 +sin_1 +cos_2 +sin_2+cos_3 +sin_3+cos_4+sin_4+cos_5 +sin_5+cos_6 +sin_6, data=df)
+summary(model_2)
+```
+The significant frequencies are cos_1, sin_1, sin_4, and cos_4. 
+
+```{r}
+plot(data, main="plot of data and fitted value")
+lines(fitted(model_2), col="red")
+plot(data-fitted(model_2), main="plot of residuals")
+```
+
+
+```{r}
+qqnorm(data-fitted(model_2))
+qqline(data-fitted(model_2), col = "steelblue", lwd = 2)
+```
